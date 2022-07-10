@@ -1,0 +1,50 @@
+Racket Web Server hello-world app
+=================================
+
+I wanted to run a simple instance of the Racket Web Server,
+dove into the docs,
+resurfaced with the code captured in this repo.
+
+Each required module is prefixed so it is clear what is coming from where!
+
+Example usage
+-------------
+
+From terminal A:
+
+    $ ./server --help
+    usage: ./server [ <option> ... ] [<directories-to-serve-static-files-from>] ...
+
+    <option> is one of
+
+      -d, --dev
+	 Development mode: open browser, show stack traces, etc.
+      -a <ip-addr>, --addr <ip-addr>
+	 Listen address.
+      -p <port-number>, --port <port-number>
+	 Listen port.
+      -l <file>, --log <file>
+	 Log file.
+      --help, -h
+	 Show this help
+      --
+	 Do not treat any remaining argument as a switch (at this level)
+
+     Multiple single-letter switches can be combined after
+     one `-`. For example, `-h-` is the same as `-h --`.
+
+    $ ./server
+    Your Web application is running at http://localhost:8000.
+    Stop this program at any time to terminate the Web Server.
+
+From terminal B:
+
+    $ curl -i localhost:8000/hello
+    HTTP/1.1 200 OK
+    Transfer-Encoding: chunked
+    Server: Racket
+    Last-Modified: Sun, 10 Jul 2022 22:07:26 GMT
+    Date: Sun, 10 Jul 2022 22:07:26 GMT
+    Content-Type: text/html; charset=utf-8
+
+    Hello, world!

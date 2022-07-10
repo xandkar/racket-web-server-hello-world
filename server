@@ -1,0 +1,59 @@
+#! /usr/bin/env racket
+#lang racket
+; vim:ft=racket:
+
+(require (prefix-in  env:  web-server/servlet-env)
+         (prefix-in  log:  web-server/dispatchers/dispatch-log)
+         (prefix-in  res:  web-server/configuration/responders))
+
+(require (prefix-in app: "app.rkt")
+         (prefix-in app-err: "app-err.rkt"))
+
+;; TODO SSL
+
+(module+ main
+  (let* ([program (path->string (find-system-path 'run-file))]
+         [log-file (string-append program ".log")]
+         [listen-addr "0.0.0.0"]
+         [listen-port 8000]
+         [dev? #f]
+         ; We need to serve at least one static path to replace the default
+         ; welcome page from the Racket web server:
+         [dirs-to-serve '(".")])
+    (command-line
+      #:program program
+      #:once-each
+      [("-d" "--dev")
+       "Development mode: open browser, show stack traces, etc."
+       (set! dev? #t)]
+      [("-a" "--addr")
+       ip-addr "Listen address."
+       (set! listen-addr ip-addr)]
+      [("-p" "--port")
+       port-number "Listen port."
+       (set! listen-port port-number)]
+      [("-l" "--log")
+       file "Log file."
+       (set! log-file file)]
+      #:args directories-to-serve-static-files-from
+      (set! dirs-to-serve
+            (append directories-to-serve-static-files-from dirs-to-serve)))
+    (env:serve/servlet
+      app:dispatch
+      #:listen-ip listen-addr
+      #:port listen-port
+      #:launch-browser? dev?
+      #:extra-files-paths dirs-to-serve
+      #:file-not-found-responder app-err:handle-error-not-found
+      #:servlet-responder
+      (if dev?
+          res:servlet-error-responder
+          app-err:handle-error-crash)
+      #:servlet-loading-responder
+      (if dev?
+          res:servlet-loading-responder
+          app-err:handle-error-crash)
+      #:log-file log-file
+      #:log-format log:paren-format
+      #:servlet-path ""
+      #:servlet-regexp #rx"")))
